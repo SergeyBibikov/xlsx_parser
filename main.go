@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -14,8 +13,9 @@ var countIndex = 2
 
 func main() {
 	start := time.Now().Unix()
-	st := fileToString(os.Args[1])
-	count(os.Args[2], &st)
+	// st := fileToString(os.Args[1])
+	// CountFull(os.Args[2], &st)
+	CountCells("senru.xlsx", "glosen.xlsx")
 	finish := time.Now().Unix()
 	fmt.Println("Done\n", "It took ", finish-start, "seconds")
 }
@@ -43,7 +43,7 @@ func fileToString(filename string) string {
 	return finst
 }
 
-func count(filename string, st *string) {
+func CountFull(filename string, st *string) {
 	f, err := excelize.OpenFile(filename)
 	if err != nil {
 		fmt.Println(err)
@@ -73,7 +73,7 @@ func count(filename string, st *string) {
 			}
 		}
 	}
-	if err := nf.SaveAs("Results.xlsx"); err != nil {
+	if err := nf.SaveAs("FullTextCountResults.xlsx"); err != nil {
 		fmt.Println(err)
 	}
 }
