@@ -2,35 +2,50 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/xuri/excelize/v2"
 )
 
-var termIndex = 2
-var countIndex = 2
-
 func main() {
+	if len(os.Args) < 4 {
+		fmt.Println("Переданы не все аргументы")
+		fmt.Println("Необходимо передать название source файла, файла-глоссария и режим подсчёта(full или cell)")
+		return
+	}
+	mode := strings.Trim(os.Args[3], "\n")
+	mode = strings.TrimSpace(mode)
+	if mode != "full" && mode != "cell" {
+		fmt.Println("Возможны два режима работы: full или cell.\nНеобходимо указать один из них в качестве последнего аргумента")
+		return
+	}
+	fmt.Println("Начинаю подсчёт. Для выхода нажмите Ctrl+C\n===============")
 	start := time.Now().Unix()
-	// st := fileToString(os.Args[1])
-	// CountFull(os.Args[2], &st)
-	CountCells("senru.xlsx", "glosen.xlsx")
+	if os.Args[3] == "full" {
+		st := fileToString(os.Args[1])
+		CountFull(os.Args[2], st)
+	}
+	if os.Args[3] == "cell" {
+		CountCells(os.Args[1], os.Args[2])
+	}
 	finish := time.Now().Unix()
-	fmt.Println("Done\n", "It took ", finish-start, "seconds")
+	fmt.Println("Готово\n", "Отчёт сформирован за", finish-start, "секунд")
 }
 
-func fileToString(filename string) string {
+func fileToString(filename string) *string {
 	strArray := make([]string, 10000)
 	f, err := excelize.OpenFile(filename)
 	if err != nil {
 		fmt.Println(err)
-		return ""
+		return nil
 	}
 	rows, err := f.GetRows("Лист1")
 	if err != nil {
 		fmt.Println(err)
-		return ""
+		return nil
 	}
 	for _, row := range rows {
 		for _, cell := range row {
@@ -40,11 +55,11 @@ func fileToString(filename string) string {
 		}
 	}
 	finst := strings.Join(strArray, " ")
-	return finst
+	return &finst
 }
 
-func CountFull(filename string, st *string) {
-	f, err := excelize.OpenFile(filename)
+func CountFull(termsFilename string, st *string) {
+	f, err := excelize.OpenFile(termsFilename)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -54,26 +69,63 @@ func CountFull(filename string, st *string) {
 		fmt.Println(err)
 		return
 	}
-	nf := excelize.NewFile()
-	index := nf.NewSheet("Sheet1")
-	nf.SetActiveSheet(index)
-	nf.SetCellValue("Sheet1", "A1", "Term")
-	nf.SetCellValue("Sheet1", "B1", "Count")
+	resultsMap := make(map[string]int)
+
+	ch := make(chan []interface{}, 200000)
 	for _, row := range rows {
 		for _, cell := range row {
 			if cell != "" && cell != " " {
-				if count := strings.Count(*st, strings.ToLower(cell)); count > 0 {
-					termCell := fmt.Sprintf("A%d", termIndex)
-					countCell := fmt.Sprintf("B%d", termIndex)
-					nf.SetCellValue("Sheet1", termCell, cell)
-					nf.SetCellValue("Sheet1", countCell, count)
-					termIndex++
-					countIndex++
-				}
+				cell = strings.ToLower(cell)
+				go temp(*st, cell, ch)
 			}
 		}
 	}
-	if err := nf.SaveAs("FullTextCountResults.xlsx"); err != nil {
-		fmt.Println(err)
+	counter := 0
+	firstRead := false
+outer:
+	for {
+		select {
+		case slice := <-ch:
+			firstRead = true
+			key := slice[0].(string)
+			v := slice[1].(int)
+			resultsMap[key] = v
+			counter = 0
+		default:
+			if firstRead && counter > 10 {
+				break outer
+			} else if !firstRead {
+
+			} else {
+				counter++
+				time.Sleep(time.Second)
+			}
+		}
+	}
+	MapToFile(&resultsMap, "FullTextCountResults.xlsx")
+}
+
+func countMatches(st string, regex string) int {
+	startingIndex := 0
+	counter := 0
+	re := regexp.MustCompile(regex)
+	for {
+		if res := re.FindStringIndex(st[startingIndex:]); res != nil {
+			counter++
+			startingIndex = startingIndex + res[0] + 2
+		} else {
+			break
+		}
+	}
+	return counter
+}
+
+func temp(st string, cell string, ch chan []interface{}) {
+	if strings.Contains(st, cell) {
+		regex := fmt.Sprintf("(^|[^0-9A-Za-zА-Яа-я_=+#~])%s(s|es|$|[^0-9A-Za-zА-Яа-я_=+#~])", cell)
+		count := countMatches(st, regex)
+		if count > 0 {
+			ch <- []interface{}{cell, count}
+		}
 	}
 }

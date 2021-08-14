@@ -99,10 +99,11 @@ func MapToFile(m *map[string]int, resultsName string) {
 
 //Выполняет всю грязную работу
 func looop(wg *sync.WaitGroup, m *map[string]int, cell *string, ch chan string) {
-	allSigns := "[^A-Za-zА-Яа-я-]"
+	startSigns := "(^|[^0-9A-Za-zА-Яа-я_=+#~])"
+	endSigns := "(s|es|$|[^0-9A-Za-zА-Яа-я_=+#~])"
 	for k := range *m {
 		if strings.Contains(*cell, k) {
-			exp := fmt.Sprintf("%s%s%s", allSigns, k, allSigns)
+			exp := fmt.Sprintf("%s%s%s", startSigns, k, endSigns)
 			if b, _ := regexp.MatchString(exp, *cell); b {
 				ch <- k
 			}
