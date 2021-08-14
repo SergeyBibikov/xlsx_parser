@@ -1,4 +1,4 @@
-module blabla.com/exce
+module github.com/SergeyBibikov/xlsx_parser
 
 go 1.16
 
