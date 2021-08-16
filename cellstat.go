@@ -32,6 +32,8 @@ func termFileToMap(filename string) *map[string]int {
 	return &termsMap
 }
 
+//Считает, в скольких ячейках есть тот или иной термин
+//Выводит результат в файл
 func CountCells(sourceFile string, termsFile string) {
 	m := termFileToMap(termsFile)
 	var wg sync.WaitGroup
@@ -76,6 +78,52 @@ outer:
 	MapToFile(&resultMap, "CellCountResults.xlsx")
 }
 
+//Считает количество ячеек с терминами.
+//Выводит результат в терминале
+func CountCellsWithTerms(sourceFile string, termsFile string) {
+	m := termFileToMap(termsFile)
+
+	f, err := excelize.OpenFile(sourceFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	rows, err := f.GetRows("Лист1")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	ch := make(chan struct{}, 2000)
+	for _, row := range rows {
+		for _, cell := range row {
+			go findTerm(m, cell, ch)
+		}
+	}
+	resultsCount := 0
+	firstRead := false
+	selectCount := 0
+outer:
+	for {
+		select {
+		case <-ch:
+			firstRead = true
+			resultsCount++
+		default:
+			if firstRead && selectCount > 10 {
+				break outer
+			} else if !firstRead {
+
+			} else {
+				selectCount++
+				time.Sleep(time.Second)
+			}
+		}
+	}
+
+	fmt.Println("Количество ячеек, в которых есть хотя бы один термин:", resultsCount)
+}
+
 func MapToFile(m *map[string]int, resultsName string) {
 	termIndex := 2
 	countIndex := 2
@@ -97,7 +145,7 @@ func MapToFile(m *map[string]int, resultsName string) {
 	}
 }
 
-//Выполняет всю грязную работу
+//Пишет в канал ключи, который найдены в ячейке
 func looop(wg *sync.WaitGroup, m *map[string]int, cell *string, ch chan string) {
 	startSigns := "(^|[^0-9A-Za-zА-Яа-я_=+#~])"
 	endSigns := "(s|es|$|[^0-9A-Za-zА-Яа-я_=+#~])"
@@ -110,4 +158,19 @@ func looop(wg *sync.WaitGroup, m *map[string]int, cell *string, ch chan string) 
 		}
 	}
 	wg.Done()
+}
+
+//Пишет в канал 1, после нахождения первого термина
+func findTerm(m *map[string]int, cell string, ch chan struct{}) {
+	startSigns := "(^|[^0-9A-Za-zА-Яа-я_=+#~])"
+	endSigns := "(s|es|$|[^0-9A-Za-zА-Яа-я_=+#~])"
+	for k := range *m {
+		if strings.Contains(cell, k) {
+			exp := fmt.Sprintf("%s%s%s", startSigns, k, endSigns)
+			if b, _ := regexp.MatchString(exp, cell); b {
+				ch <- struct{}{}
+				break
+			}
+		}
+	}
 }

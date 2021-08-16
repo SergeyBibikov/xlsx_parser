@@ -13,23 +13,28 @@ import (
 func main() {
 	if len(os.Args) < 4 {
 		fmt.Println("Переданы не все аргументы")
-		fmt.Println("Необходимо передать название source файла, файла-глоссария и режим подсчёта(full или cell)")
+		fmt.Println("Необходимо передать название source файла, файла-глоссария и режим подсчёта(full, cell или total)")
 		return
 	}
-	mode := strings.Trim(os.Args[3], "\n")
-	mode = strings.TrimSpace(mode)
-	if mode != "full" && mode != "cell" {
-		fmt.Println("Возможны два режима работы: full или cell.\nНеобходимо указать один из них в качестве последнего аргумента")
+	sourceFile := os.Args[1]
+	termsFile := os.Args[2]
+	mode := os.Args[3]
+
+	if mode != "full" && mode != "cell" && mode != "total" {
+		fmt.Println("Возможны три режима работы: full, cell или total.\nНеобходимо указать один из них в качестве последнего аргумента")
 		return
 	}
 	fmt.Println("Начинаю подсчёт. Для выхода нажмите Ctrl+C\n===============")
 	start := time.Now().Unix()
-	if os.Args[3] == "full" {
-		st := fileToString(os.Args[1])
-		CountFull(os.Args[2], st)
+	if mode == "full" {
+		st := fileToString(sourceFile)
+		CountFull(termsFile, st)
 	}
-	if os.Args[3] == "cell" {
-		CountCells(os.Args[1], os.Args[2])
+	if mode == "cell" {
+		CountCells(sourceFile, termsFile)
+	}
+	if mode == "total" {
+		CountCellsWithTerms(sourceFile, termsFile)
 	}
 	finish := time.Now().Unix()
 	fmt.Println("Готово\n", "Отчёт сформирован за", finish-start, "секунд")
