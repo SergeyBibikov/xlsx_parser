@@ -27,7 +27,7 @@ func main() {
 	fmt.Println("Начинаю подсчёт. Для выхода нажмите Ctrl+C\n===============")
 	start := time.Now().Unix()
 	if mode == "full" {
-		st := fileToString(sourceFile)
+		st := fileToStringLowercase(sourceFile)
 		CountFull(termsFile, st)
 	}
 	if mode == "cell" {
@@ -38,29 +38,6 @@ func main() {
 	}
 	finish := time.Now().Unix()
 	fmt.Println("Готово\n", "Отчёт сформирован за", finish-start, "секунд")
-}
-
-func fileToString(filename string) *string {
-	strArray := make([]string, 10000)
-	f, err := excelize.OpenFile(filename)
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	rows, err := f.GetRows("Лист1")
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	for _, row := range rows {
-		for _, cell := range row {
-			if cell != "" && cell != " " {
-				strArray = append(strArray, strings.ToLower(cell))
-			}
-		}
-	}
-	finst := strings.Join(strArray, " ")
-	return &finst
 }
 
 func CountFull(termsFilename string, st *string) {
