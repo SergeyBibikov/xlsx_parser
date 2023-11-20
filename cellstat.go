@@ -10,7 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-//Преобразует файл с терминами ы мапу
+// Преобразует файл с терминами в мапу
 func termFileToMap(filename string) *map[string]int {
 	termsMap := make(map[string]int)
 	f, err := excelize.OpenFile(filename)
@@ -32,8 +32,8 @@ func termFileToMap(filename string) *map[string]int {
 	return &termsMap
 }
 
-//Считает, в скольких ячейках есть тот или иной термин
-//Выводит результат в файл
+// Считает, в скольких ячейках есть тот или иной термин
+// Выводит результат в файл
 func CountCells(sourceFile string, termsFile string) {
 	m := termFileToMap(termsFile)
 	var wg sync.WaitGroup
@@ -78,8 +78,8 @@ outer:
 	MapToFile(&resultMap, "CellCountResults.xlsx")
 }
 
-//Считает количество ячеек с терминами.
-//Выводит результат в терминале
+// Считает количество ячеек с терминами.
+// Выводит результат в терминале
 func CountCellsWithTerms(sourceFile string, termsFile string) {
 	m := termFileToMap(termsFile)
 
@@ -145,7 +145,7 @@ func MapToFile(m *map[string]int, resultsName string) {
 	}
 }
 
-//Пишет в канал ключи, который найдены в ячейке
+// Пишет в канал ключи, который найдены в ячейке
 func looop(wg *sync.WaitGroup, m *map[string]int, cell *string, ch chan string) {
 	startSigns := "(^|[^0-9A-Za-zА-Яа-я_=+#~])"
 	endSigns := "(s|es|$|[^0-9A-Za-zА-Яа-я_=+#~])"
@@ -160,7 +160,7 @@ func looop(wg *sync.WaitGroup, m *map[string]int, cell *string, ch chan string) 
 	wg.Done()
 }
 
-//Пишет в канал 1, после нахождения первого термина
+// Пишет в канал 1, после нахождения первого термина
 func findTerm(m *map[string]int, cell string, ch chan struct{}) {
 	startSigns := "(^|[^0-9A-Za-zА-Яа-я_=+#~])"
 	endSigns := "(s|es|$|[^0-9A-Za-zА-Яа-я_=+#~])"

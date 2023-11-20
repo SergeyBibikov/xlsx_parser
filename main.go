@@ -64,6 +64,7 @@ func fileToString(filename string) *string {
 }
 
 func CountFull(termsFilename string, st *string) {
+	// Считает, сколько раз в тексте содержится каждое из слов глоссария
 	f, err := excelize.OpenFile(termsFilename)
 	if err != nil {
 		fmt.Println(err)
