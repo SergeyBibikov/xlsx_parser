@@ -3,13 +3,26 @@ package main
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/xuri/excelize/v2"
 )
 
+func hasLetters(word string) bool {
+	for _, v := range word {
+		if unicode.IsLetter(v) {
+			return true
+		}
+	}
+	return false
+}
+
 func isAcronym(word string) bool {
 	// Проверяет, является ли слово аббревиатурой
-	return len(word) > 1 && strings.ToUpper(word) == word
+	if len([]rune(word)) < 2 {
+		return false
+	}
+	return strings.ToUpper(word) == word
 }
 
 func collectString(filename string, makeLower bool) *string {

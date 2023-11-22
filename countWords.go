@@ -1,10 +1,5 @@
 package main
 
-// func countWords(filename string) {
-// 	file := fileToString(filename)
-// 	println(*file)
-// }
-
 import (
 	"sort"
 	"strings"
@@ -15,10 +10,12 @@ type tuple struct {
 	count int
 }
 
-func sortWords(words map[string]int) []tuple {
+func sortAndFilterWords(words map[string]int) []tuple {
 	sortedWords := make([]tuple, 0)
 	for word, count := range words {
-		sortedWords = append(sortedWords, tuple{word, count})
+		if hasLetters(word) {
+			sortedWords = append(sortedWords, tuple{word, count})
+		}
 	}
 
 	// Sort the slice based on values
@@ -44,4 +41,40 @@ func countWords(filename string) map[string]int {
 	}
 
 	return wordCounts
+}
+
+func getWordsLonger(words []tuple, minLength int) []tuple {
+	var result []tuple
+	for _, v := range words {
+
+		if isAcronym(v.word) || len([]rune(v.word)) >= minLength {
+
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func getWordsWithMoreCount(words []tuple, minCount int) []tuple {
+	var result []tuple
+	for _, v := range words {
+		if isAcronym(v.word) || v.count >= minCount {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func getWordsAfterFiltering(filename string, minLen int, minCount int) []tuple {
+	all_words := countWords(filename)
+	result := sortAndFilterWords(all_words)
+
+	if minLen != -1 {
+		result = getWordsLonger(result, minLen)
+	}
+	if minCount != -1 {
+		result = getWordsWithMoreCount(result, minCount)
+	}
+
+	return result
 }
