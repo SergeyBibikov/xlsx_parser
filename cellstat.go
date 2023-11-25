@@ -75,7 +75,7 @@ outer:
 		}
 	}
 	wg.Wait()
-	MapToFile(&resultMap, "CellCountResults.xlsx")
+	mapToFile(&resultMap, "CellCountResults.xlsx")
 }
 
 // Считает количество ячеек с терминами.
@@ -122,27 +122,6 @@ outer:
 	}
 
 	fmt.Println("Количество ячеек, в которых есть хотя бы один термин:", resultsCount)
-}
-
-func MapToFile(m *map[string]int, resultsName string) {
-	termIndex := 2
-	countIndex := 2
-	nf := excelize.NewFile()
-	index := nf.NewSheet("Sheet1")
-	nf.SetActiveSheet(index)
-	nf.SetCellValue("Sheet1", "A1", "Term")
-	nf.SetCellValue("Sheet1", "B1", "Count")
-	for k, v := range *m {
-		termCell := fmt.Sprintf("A%d", termIndex)
-		countCell := fmt.Sprintf("B%d", termIndex)
-		nf.SetCellValue("Sheet1", termCell, k)
-		nf.SetCellValue("Sheet1", countCell, v)
-		termIndex++
-		countIndex++
-	}
-	if err := nf.SaveAs(resultsName); err != nil {
-		fmt.Println(err)
-	}
 }
 
 // Пишет в канал ключи, который найдены в ячейке
