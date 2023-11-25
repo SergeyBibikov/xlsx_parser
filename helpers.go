@@ -119,14 +119,15 @@ func parseFlags() (string, string, int, int) {
     `, "\t \n")
 	mode := flag.String("mode", "", modesHelp)
 	command := flag.String("command", "", "Команда, которую нужно выполнить. Доступные команды: countCells, countWords")
-	minLen := flag.Int("minLen", -1, "Минимальная длина слов, которые нужно выводить в отчёте")
-	minCount := flag.Int("minCount", -1, "Минимальное количество повторений слова, которые нужно выводить в отчёте")
+	minLen := flag.Int("minLen", 0, "Минимальная длина слов, которые нужно выводить в отчёте")
+	minCount := flag.Int("minCount", 0, "Минимальное количество повторений слова, которые нужно выводить в отчёте")
 
 	flag.Parse()
 
 	if *help {
-		fmt.Println("Использование: xlsx_parser.exe [файлы] [команда] [режим работы команды]")
-		fmt.Println("Пример: xlsx_parser.exe -command=countCells -mode=full analyzeMe.xlsx terms.xlsx")
+		fmt.Println("Использование: xlsx_parser.exe [команда] [режим работы команды] [файлы] ")
+		fmt.Println("Пример countCells: xlsx_parser.exe -command=countCells -mode=full analyzeMe.xlsx terms.xlsx")
+		fmt.Println("Пример countWords: xlsx_parser.exe -command=countWords -minLen=10 -minCount=5 countMe.xlsx")
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(1)

@@ -69,10 +69,10 @@ func getWordsAfterFiltering(filename string, minLen int, minCount int) []tuple {
 	all_words := countWords(filename)
 	result := sortAndFilterWords(all_words)
 
-	if minLen != -1 {
+	if minLen != 0 {
 		result = getWordsLonger(result, minLen)
 	}
-	if minCount != -1 {
+	if minCount != 0 {
 		result = getWordsWithMoreCount(result, minCount)
 	}
 
