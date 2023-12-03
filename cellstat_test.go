@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"testing"
-
-	"github.com/xuri/excelize/v2"
 )
 
 // func TestCount(t *testing.T) {
@@ -18,6 +16,5 @@ import (
 // }
 
 func TestDebug(t *testing.T) {
-	f, _ := excelize.OpenFile("vpss.xlsx")
-	fmt.Println(getSheetRows(f))
+	fmt.Println(trimPunctuation("\"Hey,"))
 }

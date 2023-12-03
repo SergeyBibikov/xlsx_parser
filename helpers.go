@@ -10,6 +10,8 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+const PUNCTUATION_MARKS = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+
 func hasLetters(word string) bool {
 	for _, v := range word {
 		if unicode.IsLetter(v) {
@@ -24,6 +26,13 @@ func isAcronym(word string) bool {
 	if len([]rune(word)) < 2 {
 		return false
 	}
+
+	for _, char := range word {
+		if !unicode.IsLetter(char) && char != '-' {
+			return false
+		}
+	}
+
 	return strings.ToUpper(word) == word
 }
 
@@ -169,4 +178,8 @@ func getSheetRows(file *excelize.File) [][]string {
 		}
 	}
 	return rows
+}
+
+func trimPunctuation(word string) string {
+	return strings.Trim(word, PUNCTUATION_MARKS)
 }

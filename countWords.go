@@ -37,6 +37,7 @@ func countWords(filename string) map[string]int {
 
 	// Count the occurrences of each word
 	for _, word := range words {
+		word = trimPunctuation(word)
 		wordCounts[word]++
 	}
 
