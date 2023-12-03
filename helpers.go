@@ -34,11 +34,7 @@ func collectString(filename string, makeLower bool) *string {
 		fmt.Println(err)
 		return nil
 	}
-	rows, err := f.GetRows("Лист1")
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
+	rows := getSheetRows(f)
 	for _, row := range rows {
 		for _, cell := range row {
 			if cell != "" && cell != " " {
@@ -153,4 +149,24 @@ func parseFlags() (string, string, int, int) {
 	}
 
 	return *command, *mode, *minLen, *minCount
+}
+
+func getSheetRows(file *excelize.File) [][]string {
+	listRu := "Лист1"
+	listEn := "Sheet1"
+	rows, err := file.GetRows(listEn)
+	if err != nil {
+		if err.Error() == "sheet Sheet1 is not exist" {
+			rows, err := file.GetRows(listRu)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			return rows
+		} else {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+	return rows
 }

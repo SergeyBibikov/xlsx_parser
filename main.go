@@ -50,11 +50,7 @@ func CountFull(termsFilename string, st *string) {
 		fmt.Println(err)
 		return
 	}
-	rows, err := f.GetRows("Лист1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	rows := getSheetRows(f)
 	resultsMap := make(map[string]int)
 
 	ch := make(chan []interface{}, 200000)

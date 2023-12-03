@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"testing"
+
+	"github.com/xuri/excelize/v2"
 )
 
 // func TestCount(t *testing.T) {
@@ -16,8 +18,6 @@ import (
 // }
 
 func TestDebug(t *testing.T) {
-	words := getWordsAfterFiltering("vpss.xlsx", 5, 30)
-	for _, v := range words {
-		fmt.Printf("%s:%d\n", v.word, v.count)
-	}
+	f, _ := excelize.OpenFile("vpss.xlsx")
+	fmt.Println(getSheetRows(f))
 }

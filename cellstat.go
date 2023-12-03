@@ -18,11 +18,7 @@ func termFileToMap(filename string) *map[string]int {
 		fmt.Println(err)
 		return nil
 	}
-	rows, err := f.GetRows("Лист1")
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
+	rows := getSheetRows(f)
 	for _, cells := range rows {
 		for _, cell := range cells {
 			cell = strings.ToLower(cell)
@@ -45,11 +41,7 @@ func CountCells(sourceFile string, termsFile string) {
 		fmt.Println(err)
 		return
 	}
-	rows, err := f.GetRows("Лист1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	rows := getSheetRows(f)
 	for _, cells := range rows {
 		for _, cell := range cells {
 			if cell != "" && cell != " " {
@@ -88,11 +80,7 @@ func CountCellsWithTerms(sourceFile string, termsFile string) {
 		fmt.Println(err)
 		return
 	}
-	rows, err := f.GetRows("Лист1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	rows := getSheetRows(f)
 
 	ch := make(chan struct{}, 2000)
 	for _, row := range rows {
